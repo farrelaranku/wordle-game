@@ -2,203 +2,68 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Wordle Game</title>
+    <title>Login Page</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <style>
-    </style>
 </head>
 <body>
+    <div id="login-container">
+        <h1>Login</h1>
+        <form id="login-form">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button type="submit" id="submit-button">Login</button>
+        </form>
 
-
-
-    <div id="wordle-container">
-        <div>
-            
-                <h2 id="profile-button">User Profile</h2>
-           
-                <h2 id="get-users-button">User List</h2>
-            
-                <h2 id="get-scores-button">Score List</h2>
-            
-        </div>
-
-        <h1>Wordle Game</h1>
-        <p>Guess the 5-letter word:</p>
-        
-        <input type="text" id="wordle-input" maxlength="5" placeholder=" Enter your guess here">
-        <button id="submit-button" onclick="checkWord()">GUESS!</button>
-        <p id="wordle-result"></p>
-        <div id="attempts-container">
-            <h2>Attempts:</h2>
-            <div id="attempts"></div>
-            <div id="correct-word" class="attempt"></div>
-        </div>
-        <div id="score">Score: 0</div>
-        <button id="next-level" onclick="nextLevel()">Next Level</button>
+        <h1>Register</h1>
+        <a href="register.html">
+            <button id="submit-button">Register</button>
+        </a>
     </div>
 
-   
-
     <script>
-        const authToken = localStorage.getItem('authToken');
-       // alert(authToken);
-       const words = [
-    "apple", "grape", "lemon", "melon", "peach", "plume",
-    "beach", "black", "board", "brave", "break", "cable", "cloud",
-    "color", "crane", "dairy", "dance", "eagle", "fairy", "flame",
-    "flour", "flood", "frost", "glare", "green", "happy", "heart",
-    "house", "ivory", "jolly", "knife", "leash", "light", "lunar",
-    "magic", "maple", "night", "ocean", "panda", "peace", "queen",
-    "quiet", "rider", "rover", "sable", "saint", "smile", "snake",
-    "space", "spoon", "table", "tiger", "twist", "union", "vivid",
-    "waste", "watch", "wheat", "world", "zebra", "zesty"
-];
+        let authToken = '';
+        const loginForm = document.getElementById("login-form");
+        const registerForm = document.getElementById("register-form");
 
-        let chosenWord = '';
-        let attempts = 0;
-        const maxAttempts = 6;
-        let score = 0;
-        let level = 1;
+        loginForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-        function startNewLevel() {
-            chosenWord = words[Math.floor(Math.random() * words.length)];
-            attempts = 0;
-            resetGameUI();
-            updateScore();
-            document.getElementById("next-level").style.display = "none";
-        }
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-        function resetGameUI() {
-            document.getElementById("wordle-result").textContent = "";
-            document.getElementById("attempts").textContent = "";
-            document.getElementById("correct-word").textContent = "";
-            document.getElementById("wordle-input").value = "";
-        }
+            const requestBody = {
+                email: email,
+                password: password
+            };
 
-        function checkWord() {
-            if (attempts >= maxAttempts) {
-                alert("You have reached the maximum number of attempts. You lose!");
-                return;
-            }
+            try {
+                const response = await fetch('https://ets-pemrograman-web-f.cyclic.app/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
 
-            const inputElement = document.getElementById("wordle-input");
-            const guess = inputElement.value.toLowerCase();
-            inputElement.value = "";
+                if (response.status === 200) {
+                    const data = await response.json();
+                    alert(data.message);
 
-            if (guess.length !== 5) {
-                alert("Guess must be 5 letters long.");
-                return;
-            }
-
-            attempts++;
-
-            if (guess === chosenWord) {
-                document.getElementById("wordle-result").innerHTML = `Congratulations! <br> You guessed the word "${chosenWord}" in ${attempts} attempts.`;
-                displayCorrectWord(chosenWord);
-                calculateScore();
-                document.getElementById("next-level").style.display = "block";
-            } else {
-                const result = getResult(chosenWord, guess);
-
-                // Tambahkan informasi attempt sebelumnya
-                const attemptsElement = document.getElementById("attempts");
-                const attemptElement = document.createElement("div");
-                attemptElement.classList.add("attempt");
-
-                for (let i = 0; i < 5; i++) {
-                    const letterBox = document.createElement("div");
-                    letterBox.classList.add("letter-box");
-
-                    if (result[i] === 'O') {
-                        letterBox.classList.add("correct");
-                    } else if (result[i] === 'X') {
-                        letterBox.classList.add("incorrect");
-                    } else {
-                        letterBox.classList.add("not-found");
-                    }
-
-                    letterBox.textContent = guess[i];
-                    attemptElement.appendChild(letterBox);
-                }
-
-                attemptsElement.appendChild(attemptElement);
-            }
-
-            if (attempts === maxAttempts && guess !== chosenWord) {
-                alert(`You have reached the maximum number of attempts. The word was "${chosenWord}". You lose!`);
-                score = 0;
-                updateScore();
-                document.getElementById("next-level").style.display = "block";
-                return;
-      }
-        }
-
-        function getResult(word, guess) {
-            let result = '';
-            for (let i = 0; i < 5; i++) {
-                if (word[i] === guess[i]) {
-                    result += 'O';
-                } else if (word.includes(guess[i])) {
-                    result += 'X';
+                    authToken = data.data.access_token;
+                    localStorage.setItem('authToken', authToken);
+                    window.location.href = 'index.html';
                 } else {
-                    result += '_';
+                    alert("Login gagal. Periksa email dan password Anda.");
                 }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("Terjadi kesalahan saat mengirim permintaan login.");
             }
-            return result;
-        }
-
-        function displayCorrectWord(word) {
-            const correctWordElement = document.getElementById("correct-word");
-             // correctWordElement.innerHTML = "Correct Word: ";
-            for (let i = 0; i < 5; i++) {
-                const letterBox = document.createElement("div");
-                letterBox.classList.add("letter-box", "correct");
-                letterBox.textContent = word[i];
-                correctWordElement.appendChild(letterBox);
-            }
-        }
-
-        function calculateScore() {
-            const baseScore = 100;
-            const attemptsUsed = attempts;
-            // Perhitungan skor yang diperbaiki
-            score += baseScore - ((attemptsUsed-1) * 20);
-            updateScore();
-        }
-
-        function updateScore() {
-            document.getElementById("score").textContent = `Score: ${score}`;
-        }
-
-        function nextLevel() {
-            level++;
-            startNewLevel();
-        }
-
-
-        const profileButton = document.getElementById("profile-button");
-
-profileButton.addEventListener("click", function () {
-   
-    window.location.href = 'profile.html';
-});
-
-        const getUsersButton = document.getElementById("get-users-button");
-
-        getUsersButton.addEventListener("click", async function () {
-            window.location.href = 'userlist.html';
-});
-
-
-const getScoresButton = document.getElementById("get-scores-button");
-
-getScoresButton.addEventListener("click", async function () {
-    window.location.href = 'scorelist.html';
-});
-
-
-        
-        startNewLevel();
+        });
     </script>
 </body>
 </html>
