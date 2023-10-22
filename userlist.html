@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>User Page</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div id="user-list-container">
+        <h1>User List</h1>
+        <div id="user-list"></div>
+    </div>
+
+    <script>
+        const userList = document.getElementById("user-list");
+        const authToken = localStorage.getItem('authToken');
+        
+        document.addEventListener("DOMContentLoaded", async function () {
+            try {
+        if (authToken) {
+            // Gunakan token yang disimpan dalam header otorisasi
+            const response = await fetch('https://ets-pemrograman-web-f.cyclic.app/users', {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    const users = data.data;
+                    userList.innerHTML = "<h2>User List:</h2>";
+                    users.forEach(user => {
+                        const userElement = document.createElement("div");
+                        userElement.innerHTML = `ID: ${user.id}<br>Name: ${user.nama}<br>Email: ${user.email}<br>Login At: ${user.login_at}<br><br>`;
+                        userList.appendChild(userElement);
+                    });
+                } else {
+                    alert("Gagal mendapatkan data pengguna.");
+                }
+            } else {
+                alert("Gagal mengambil data pengguna.");
+            }
+        } else {
+            alert("Anda perlu login terlebih dahulu untuk mengambil data pengguna.");
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert("Terjadi kesalahan saat mengambil data pengguna.");
+    }
+        });
+    </script>
+</body>
+</html>
