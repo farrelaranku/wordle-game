@@ -8,7 +8,20 @@
     </style>
 </head>
 <body>
+
+
+
     <div id="wordle-container">
+        <div>
+            
+                <h2 id="profile-button">User Profile</h2>
+           
+                <h2 id="get-users-button">User List</h2>
+            
+                <h2 id="get-scores-button">Score List</h2>
+            
+        </div>
+
         <h1>Wordle Game</h1>
         <p>Guess the 5-letter word:</p>
         
@@ -24,19 +37,7 @@
         <button id="next-level" onclick="nextLevel()">Next Level</button>
     </div>
 
-    <div>
-        <div id="user-profile-container">
-            <h1 id="profile-button">User Profile</h1>
-        </div>
-        
-        <div id="user-list-container">
-            <h1 id="get-users-button">User List</h1>
-        </div>
-
-        <div id="score-list-container">
-            <h1 id="get-scores-button">Score List</h1>
-        </div>
-    </div>
+   
 
     <script>
         const authToken = localStorage.getItem('authToken');
